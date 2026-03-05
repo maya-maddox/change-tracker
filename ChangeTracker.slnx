@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ChangeTracker.Api/ChangeTracker.Api.csproj" />
+    <Project Path="src/ChangeTracker.Application/ChangeTracker.Application.csproj" />
+    <Project Path="src/ChangeTracker.Domain/ChangeTracker.Domain.csproj" />
+    <Project Path="src/ChangeTracker.Infrastructure/ChangeTracker.Infrastructure.csproj" />
+  </Folder>
+</Solution>
