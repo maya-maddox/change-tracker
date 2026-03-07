@@ -11,6 +11,7 @@ public class ChangeTrackerDbContext : DbContext
     }
 
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<AuditRecord> AuditRecords => Set<AuditRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
