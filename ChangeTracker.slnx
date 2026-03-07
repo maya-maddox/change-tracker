@@ -5,4 +5,7 @@
     <Project Path="src/ChangeTracker.Domain/ChangeTracker.Domain.csproj" />
     <Project Path="src/ChangeTracker.Infrastructure/ChangeTracker.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ChangeTracker.UnitTests/ChangeTracker.UnitTests.csproj" />
+  </Folder>
 </Solution>
