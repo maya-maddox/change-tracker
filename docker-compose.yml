@@ -10,5 +10,15 @@ services:
     volumes:
       - sqlserver-data:/var/opt/mssql
 
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: changetracker-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
 volumes:
   sqlserver-data:
+  rabbitmq-data:
