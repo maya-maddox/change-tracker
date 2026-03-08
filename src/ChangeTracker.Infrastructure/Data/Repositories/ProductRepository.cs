@@ -4,14 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChangeTracker.Infrastructure.Data.Repositories;
 
-public class ProductRepository : IProductRepository
+public class ProductRepository(ChangeTrackerDbContext context) : IProductRepository
 {
-    private readonly ChangeTrackerDbContext _context;
-
-    public ProductRepository(ChangeTrackerDbContext context)
-    {
-        _context = context;
-    }
+    private readonly ChangeTrackerDbContext _context = context;
 
     public async Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {

@@ -6,16 +6,10 @@ using ChangeTracker.Domain.Entities;
 
 namespace ChangeTracker.Application.Services;
 
-public class ProductService : IProductService
+public class ProductService(IProductRepository repository, IMessagePublisher publisher) : IProductService
 {
-    private readonly IProductRepository _repository;
-    private readonly IMessagePublisher _publisher;
-
-    public ProductService(IProductRepository repository, IMessagePublisher publisher)
-    {
-        _repository = repository;
-        _publisher = publisher;
-    }
+    private readonly IProductRepository _repository = repository;
+    private readonly IMessagePublisher _publisher = publisher;
 
     public async Task<IReadOnlyList<ProductResponse>> GetAllAsync(CancellationToken cancellationToken = default)
     {
