@@ -1,6 +1,5 @@
 using ChangeTracker.Application.DTOs;
 using ChangeTracker.Application.Interfaces;
-using ChangeTracker.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChangeTracker.Api.Controllers;
@@ -9,76 +8,54 @@ namespace ChangeTracker.Api.Controllers;
 [Route("api/[controller]")]
 public class ProductsController : ControllerBase
 {
-    private readonly IProductRepository _repository;
+    private readonly IProductService _productService;
 
-    public ProductsController(IProductRepository repository)
+    public ProductsController(IProductService productService)
     {
-        _repository = repository;
+        _productService = productService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<ProductResponse>>> GetAll(CancellationToken cancellationToken)
     {
-        var products = await _repository.GetAllAsync(cancellationToken);
-        return Ok(products.Select(ToResponse));
+        var products = await _productService.GetAllAsync(cancellationToken);
+        return Ok(products);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ProductResponse>> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var product = await _repository.GetByIdAsync(id, cancellationToken);
+        var product = await _productService.GetByIdAsync(id, cancellationToken);
         if (product is null)
             return NotFound();
 
-        return Ok(ToResponse(product));
+        return Ok(product);
     }
 
     [HttpPost]
     public async Task<ActionResult<ProductResponse>> Create(CreateProductRequest request, CancellationToken cancellationToken)
     {
-        var product = new Product
-        {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
-            Description = request.Description,
-            Price = request.Price,
-            Quantity = request.Quantity,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-
-        await _repository.AddAsync(product, cancellationToken);
-        return CreatedAtAction(nameof(GetById), new { id = product.Id }, ToResponse(product));
+        var product = await _productService.CreateAsync(request, cancellationToken);
+        return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
     }
 
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<ProductResponse>> Update(Guid id, UpdateProductRequest request, CancellationToken cancellationToken)
     {
-        var product = await _repository.GetByIdAsync(id, cancellationToken);
+        var product = await _productService.UpdateAsync(id, request, cancellationToken);
         if (product is null)
             return NotFound();
 
-        product.Name = request.Name;
-        product.Description = request.Description;
-        product.Price = request.Price;
-        product.Quantity = request.Quantity;
-        product.UpdatedAt = DateTime.UtcNow;
-
-        await _repository.UpdateAsync(product, cancellationToken);
-        return Ok(ToResponse(product));
+        return Ok(product);
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var product = await _repository.GetByIdAsync(id, cancellationToken);
-        if (product is null)
+        var deleted = await _productService.DeleteAsync(id, cancellationToken);
+        if (!deleted)
             return NotFound();
 
-        await _repository.DeleteAsync(id, cancellationToken);
         return NoContent();
     }
-
-    private static ProductResponse ToResponse(Product product) =>
-        new(product.Id, product.Name, product.Description, product.Price, product.Quantity, product.CreatedAt, product.UpdatedAt);
 }

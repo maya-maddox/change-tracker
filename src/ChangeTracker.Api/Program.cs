@@ -1,6 +1,8 @@
 using ChangeTracker.Application.Interfaces;
+using ChangeTracker.Application.Services;
 using ChangeTracker.Infrastructure.Data;
 using ChangeTracker.Infrastructure.Data.Repositories;
+using ChangeTracker.Infrastructure.Messaging;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,14 @@ builder.Services.AddDbContext<ChangeTrackerDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
+
+builder.Services.AddSingleton<IMessagePublisher>(sp =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("RabbitMq")
+        ?? "amqp://guest:guest@localhost:5672";
+    return RabbitMqPublisher.CreateAsync(connectionString).GetAwaiter().GetResult();
+});
 
 var app = builder.Build();
 
