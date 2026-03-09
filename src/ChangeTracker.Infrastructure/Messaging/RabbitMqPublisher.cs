@@ -8,10 +8,6 @@ namespace ChangeTracker.Infrastructure.Messaging;
 
 public class RabbitMqPublisher : IMessagePublisher, IAsyncDisposable
 {
-    public const string ExchangeName = "change-tracker";
-    public const string QueueName = "entity-changes";
-    public const string RoutingKey = "entity.changed";
-
     private readonly IConnection _connection;
     private readonly IChannel _channel;
 
@@ -27,24 +23,7 @@ public class RabbitMqPublisher : IMessagePublisher, IAsyncDisposable
         var connection = await factory.CreateConnectionAsync(cancellationToken);
         var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
-        await channel.ExchangeDeclareAsync(
-            exchange: ExchangeName,
-            type: ExchangeType.Direct,
-            durable: true,
-            cancellationToken: cancellationToken);
-
-        await channel.QueueDeclareAsync(
-            queue: QueueName,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            cancellationToken: cancellationToken);
-
-        await channel.QueueBindAsync(
-            queue: QueueName,
-            exchange: ExchangeName,
-            routingKey: RoutingKey,
-            cancellationToken: cancellationToken);
+        await RabbitMqTopology.DeclareAsync(channel, cancellationToken);
 
         return new RabbitMqPublisher(connection, channel);
     }
@@ -55,8 +34,8 @@ public class RabbitMqPublisher : IMessagePublisher, IAsyncDisposable
         var properties = new BasicProperties { Persistent = true };
 
         await _channel.BasicPublishAsync(
-            exchange: ExchangeName,
-            routingKey: RoutingKey,
+            exchange: RabbitMqTopology.ExchangeName,
+            routingKey: RabbitMqTopology.RoutingKey,
             mandatory: false,
             basicProperties: properties,
             body: body,
