@@ -15,6 +15,7 @@ builder.Services.AddDbContext<ChangeTrackerDbContext>(options =>
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IAuditRepository, AuditRepository>();
 
 builder.Services.AddSingleton<IMessagePublisher>(sp =>
 {
