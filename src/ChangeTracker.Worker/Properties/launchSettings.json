@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ChangeTracker.Worker": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
