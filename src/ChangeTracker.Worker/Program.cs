@@ -2,21 +2,40 @@ using ChangeTracker.Infrastructure.Data;
 using ChangeTracker.Worker;
 using Microsoft.EntityFrameworkCore;
 using RabbitMQ.Client;
+using Serilog;
 
-var builder = Host.CreateApplicationBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-builder.Services.AddDbContext<ChangeTrackerDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddSingleton<IConnection>(_ =>
+try
 {
-    var connectionString = builder.Configuration.GetConnectionString("RabbitMq")
-        ?? "amqp://guest:guest@localhost:5672";
-    var factory = new ConnectionFactory { Uri = new Uri(connectionString) };
-    return factory.CreateConnectionAsync().GetAwaiter().GetResult();
-});
+    var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddHostedService<AuditConsumer>();
+    builder.Services.AddSerilog((_, configuration) =>
+        configuration.ReadFrom.Configuration(builder.Configuration));
 
-var host = builder.Build();
-host.Run();
+    builder.Services.AddDbContext<ChangeTrackerDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+    builder.Services.AddSingleton<IConnection>(_ =>
+    {
+        var connectionString = builder.Configuration.GetConnectionString("RabbitMq")
+            ?? "amqp://guest:guest@localhost:5672";
+        var factory = new ConnectionFactory { Uri = new Uri(connectionString) };
+        return factory.CreateConnectionAsync().GetAwaiter().GetResult();
+    });
+
+    builder.Services.AddHostedService<AuditConsumer>();
+
+    var host = builder.Build();
+    host.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Worker terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
