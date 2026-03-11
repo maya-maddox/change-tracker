@@ -39,4 +39,14 @@ public class AuditRepository(ChangeTrackerDbContext context) : IAuditRepository
 
         return (items, totalCount);
     }
+
+    public async Task<IReadOnlyList<AuditRecord>> GetLineageAsync(
+        Guid entityId, CancellationToken cancellationToken = default)
+    {
+        return await _context.AuditRecords
+            .AsNoTracking()
+            .Where(a => a.EntityId == entityId)
+            .OrderBy(a => a.Timestamp)
+            .ToListAsync(cancellationToken);
+    }
 }

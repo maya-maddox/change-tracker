@@ -7,4 +7,7 @@ public interface IAuditRepository
 {
     Task<(IReadOnlyList<AuditRecord> Items, int TotalCount)> QueryAsync(
         AuditQueryParameters parameters, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<AuditRecord>> GetLineageAsync(
+        Guid entityId, CancellationToken cancellationToken = default);
 }

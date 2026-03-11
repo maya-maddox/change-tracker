@@ -22,4 +22,17 @@ public class AuditsController(IAuditRepository auditRepository) : ControllerBase
 
         return Ok(new PagedResult<AuditRecordResponse>(responses, totalCount, parameters.Page, parameters.PageSize));
     }
+
+    [HttpGet("{entityId:guid}/lineage")]
+    public async Task<ActionResult<IReadOnlyList<AuditRecordResponse>>> GetLineage(
+        Guid entityId, CancellationToken cancellationToken)
+    {
+        var records = await _auditRepository.GetLineageAsync(entityId, cancellationToken);
+
+        var responses = records.Select(r =>
+            new AuditRecordResponse(r.Id, r.EntityType, r.EntityId, r.Action, r.Changes, r.Timestamp))
+            .ToList();
+
+        return Ok(responses);
+    }
 }
